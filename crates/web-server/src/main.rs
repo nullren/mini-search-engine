@@ -17,8 +17,10 @@ struct Cli {
 async fn main() {
     let args = Cli::parse();
 
-    set_search_impl(Box::new(ElasticsearchRemote::new(&args.elasticsearch_address)))
-        .expect("Failed to set global search backend");
+    set_search_impl(Box::new(ElasticsearchRemote::new(
+        &args.elasticsearch_address,
+    )))
+    .expect("Failed to set global search backend");
 
     let app = Router::new().merge(html_router());
     let addr = format!("0.0.0.0:{}", args.listen_port);
