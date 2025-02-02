@@ -98,7 +98,7 @@ async fn get_search(Query(params): Query<HashMap<String, String>>) -> impl IntoR
     let query = params.get("q").cloned().unwrap_or_default();
 
     // Call the global search (which must be set by the main crate)
-    let search_res: Result<SearchResults, _> = search(&query);
+    let search_res: Result<SearchResults, _> = search(&query).await;
 
     match search_res {
         Ok(result) => {

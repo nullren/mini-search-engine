@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use once_cell::sync::OnceCell;
 use std::error::Error as StdError;
 
@@ -40,8 +41,9 @@ impl From<Box<dyn StdError>> for SearchError {
 
 impl StdError for SearchError {}
 
+#[async_trait]
 pub trait Search: Send + Sync {
-    fn search(&self, query: &str) -> Result<SearchResults, SearchError>;
+    async fn search(&self, query: &str) -> Result<SearchResults, SearchError>;
 }
 
 static GLOBAL_SEARCH_IMPL: OnceCell<Box<dyn Search>> = OnceCell::new();
@@ -52,9 +54,9 @@ pub fn set_search_impl(backend: Box<dyn Search>) -> Result<(), Box<dyn StdError>
         .map_err(|_| "Search implementation is already set!".into())
 }
 
-pub fn search(query: &str) -> Result<SearchResults, SearchError> {
+pub async fn search(query: &str) -> Result<SearchResults, SearchError> {
     if let Some(backend) = GLOBAL_SEARCH_IMPL.get() {
-        backend.search(query)
+        backend.search(query).await
     } else {
         Err(SearchError::Internal(
             "No search implementation set!".to_string(),

@@ -1,8 +1,9 @@
+use async_trait::async_trait;
 use elasticsearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use elasticsearch::http::Url;
-use elasticsearch::Elasticsearch;
+use elasticsearch::{Elasticsearch, SearchParts};
 use search_api::{Search, SearchResult, SearchResults, Snippet};
-use serde_json::json;
+use serde_json::{json, Value};
 
 pub struct ElasticsearchStub {}
 
@@ -12,8 +13,9 @@ impl ElasticsearchStub {
     }
 }
 
+#[async_trait]
 impl Search for ElasticsearchStub {
-    fn search(&self, _query: &str) -> Result<SearchResults, search_api::SearchError> {
+    async fn search(&self, _query: &str) -> Result<SearchResults, search_api::SearchError> {
         Ok(SearchResults {
             results: vec![SearchResult {
                 title: "a stubbed title".to_string(),
@@ -45,31 +47,40 @@ impl ElasticsearchRemote {
     }
 }
 
+#[async_trait]
 impl Search for ElasticsearchRemote {
-    fn search(&self, query: &str) -> Result<SearchResults, search_api::SearchError> {
-        let response = self
-            .client
-            .search()
-            .body(json!({
+    async fn search(&self, query: &str) -> Result<SearchResults, search_api::SearchError> {
+        let query = json!({
                 "query": {
-                    "match": {
-                        "content": query
+                    "query_string": {
+                        "query": query.to_string(),
+                        "default_field": "body"
                     }
                 }
-            }))
+            });
+        println!("query: {:?}", query);
+
+        let response = self
+            .client
+            .search(SearchParts::Index(&["parks-australia"]))
+            .body(query)
+            .allow_no_indices(true)
             .send()
             .await
             .unwrap();
-        let hits = response.json::<serde_json::Value>().unwrap()["hits"]["hits"]
+
+        let response_body = response.json::<Value>().await.unwrap();
+        println!("response: {:?}", response_body);
+
+        let results = response_body["hits"]["hits"]
             .as_array()
-            .unwrap();
-        let results = hits
+            .unwrap()
             .iter()
             .map(|hit| SearchResult {
                 title: hit["_source"]["title"].as_str().unwrap().to_string(),
                 url: hit["_source"]["url"].as_str().unwrap().to_string(),
                 snippet: Snippet {
-                    content: hit["_source"]["content"].as_str().unwrap().to_string(),
+                    content: hit["_source"]["meta_description"].as_str().unwrap().to_string(),
                     highlighted: vec![],
                 },
             })
