@@ -7,10 +7,14 @@
 
 # Domains allowed for the crawl
 domains:
-- url: https://parksaustralia.gov.au
+- url: https://nullren.com
   seed_urls:
-  - https://parksaustralia.gov.au
-  - https://parksaustralia.gov.au/news/
+  - https://nullren.com
+  - https://nullren.com/index2.html
+#- url: https://parksaustralia.gov.au
+#  seed_urls:
+#  - https://parksaustralia.gov.au
+#  - https://parksaustralia.gov.au/news/
 
 # Where to send the results. Possible values are console, file, or elasticsearch
 output_sink: elasticsearch
@@ -19,14 +23,14 @@ output_sink: elasticsearch
 output_index: parks-australia
 
 # Crawl tuning
-max_crawl_depth: 2
+max_crawl_depth: 20
 
 # Crawl result field size limits
 max_title_size: 500
 max_body_size: 5_242_880 # 5 megabytes
 max_keywords_size: 512
 max_description_size: 512
-max_indexed_links_count: 5
+max_indexed_links_count: 500
 max_headings_count: 5
 
 elasticsearch:
