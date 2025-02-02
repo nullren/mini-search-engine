@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+axum = "0.8"
+search-api = { path = "../search-api" }
+search-api-elasticsearch = { path = "../search-api-elasticsearch" }
+html-search = { path = "../html-search" }
+tokio = { version = "1", features = ["full"] }

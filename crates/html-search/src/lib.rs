@@ -7,6 +7,7 @@ use axum::{
 use askama::Template;
 use search_api::{search, SearchResults, Snippet};
 use std::collections::HashMap;
+use axum::response::Html;
 
 /// Convert the snippet into an HTML string with highlight markup.
 /// e.g. given "hello world" with highlight [(0,5)], returns "<mark>hello</mark> world"
@@ -88,7 +89,7 @@ pub struct SearchResultsTemplate {
 /// Show a simple HTML form that points to `/search`.
 async fn get_index() -> impl IntoResponse {
     // Renders the index.html template (see templates below)
-    IndexTemplate.render().unwrap_or_else(|_| "Template error".into())
+    Html(IndexTemplate.render().unwrap_or_else(|_| "Template error".into()))
 }
 
 /// Parse `?q=...`, call the global search, and display results.
@@ -104,9 +105,9 @@ async fn get_search(Query(params): Query<HashMap<String, String>>) -> impl IntoR
             let view = to_search_results_view(&result);
 
             let tpl = SearchResultsTemplate { data: view };
-            tpl.render().unwrap_or_else(|_| "Template error".into())
+            Html(tpl.render().unwrap_or_else(|_| "Template error".into()))
         }
-        Err(err) => format!("Search failed: {err}"),
+        Err(err) => Html(format!("Search failed: {err}")),
     }
 }
 

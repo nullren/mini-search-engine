@@ -1,14 +1,22 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use search_api::{Search, SearchResult, SearchResults, Snippet};
+
+pub struct ElasticsearchSearch {}
+
+impl ElasticsearchSearch {
+    pub fn new() -> Self {
+        ElasticsearchSearch {}
+    }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+impl Search for ElasticsearchSearch {
+    fn search(&self, _query: &str) -> Result<SearchResults, search_api::SearchError> {
+        Ok(SearchResults { results: vec![SearchResult{
+            title: "a stubbed title".to_string(),
+            url: "https://notneeded.net/stubbed/blah".to_string(),
+            snippet: Snippet {
+                content: "a stubbed snippet".to_string(),
+                highlighted: vec![(2, 5)],
+            },
+        }] })
     }
 }
