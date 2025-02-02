@@ -2,7 +2,6 @@ FROM rust:1 AS chef
 # We only pay the installation cost once,
 # it will be cached from the second build onwards
 RUN apt-get update -y && \
-    apt-get install -y protobuf-compiler && \
     cargo install cargo-chef
 WORKDIR /app
 
@@ -16,7 +15,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 # Build application
 COPY . .
-RUN cargo build --release --bin hotelier
+RUN cargo build --release --bin web-server
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
@@ -25,8 +24,11 @@ FROM debian:bookworm-slim AS runtime
 RUN apt-get update && \
     apt-get install -y libssl3 ca-certificates && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* \
+
+ENV LISTEN_PORT=3000
+ENV ELASTICSEARCH_ADDRESS=http://elasticsearch:9200
 
 WORKDIR /app
-COPY --from=builder /app/target/release/hotelier /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/hotelier"]
+COPY --from=builder /app/target/release/web-server /usr/local/bin
+ENTRYPOINT ["/usr/local/bin/web-server"]

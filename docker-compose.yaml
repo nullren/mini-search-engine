@@ -2,8 +2,7 @@ services:
   elasticsearch:
     image: elasticsearch:8.17.1
     ports:
-    - "9200:9200"
-    - "9300:9300"
+    - 9200
     deploy:
       resources:
         limits:
@@ -38,10 +37,22 @@ services:
       elasticsearch:
         condition: service_healthy
     ports:
-    - "5601:5601"
+    - 5601
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - SERVER_NAME=kibana
+    networks: [elastic]
+
+  web-server:
+    build: .
+    environment:
+    - LISTEN_PORT=8080
+    - ELASTICSEARCH_ADDRESS=http://elasticsearch:9200
+    ports:
+    - 8080
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     networks: [elastic]
 
 networks:

@@ -9,3 +9,4 @@ search-api = { path = "../search-api" }
 search-api-elasticsearch = { path = "../search-api-elasticsearch" }
 html-search = { path = "../html-search" }
 tokio = { version = "1", features = ["full"] }
+clap = { version = "4.5.27", features = ["derive", "env"] }
