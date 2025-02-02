@@ -1,8 +1,8 @@
 use axum::Router;
-use tokio::net::TcpListener;
+use html_search::router as html_router;
 use search_api::set_search_impl;
 use search_api_elasticsearch::ElasticsearchStub;
-use html_search::router as html_router;
+use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
@@ -27,5 +27,7 @@ async fn main() {
     println!("Listening on http://{}", addr);
 
     let listener = TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app.into_make_service()).await.unwrap();
+    axum::serve(listener, app.into_make_service())
+        .await
+        .unwrap();
 }

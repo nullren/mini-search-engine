@@ -1,13 +1,8 @@
-use axum::{
-    extract::Query,
-    response::IntoResponse,
-    routing::{get},
-    Router,
-};
 use askama::Template;
+use axum::response::Html;
+use axum::{extract::Query, response::IntoResponse, routing::get, Router};
 use search_api::{search, SearchResults, Snippet};
 use std::collections::HashMap;
-use axum::response::Html;
 
 /// Convert the snippet into an HTML string with highlight markup.
 /// e.g. given "hello world" with highlight [(0,5)], returns "<mark>hello</mark> world"
@@ -57,13 +52,15 @@ pub struct SearchResultsView {
 /// Convert a `SearchResults` object into a `SearchResultsView`
 /// for easy rendering in the template.
 pub fn to_search_results_view(sr: &SearchResults) -> SearchResultsView {
-    let results = sr.results.iter().map(|r| {
-        SearchResultView {
+    let results = sr
+        .results
+        .iter()
+        .map(|r| SearchResultView {
             title: r.title.clone(),
             url: r.url.clone(),
             snippet_html: snippet_to_html(&r.snippet),
-        }
-    }).collect();
+        })
+        .collect();
 
     SearchResultsView { results }
 }
@@ -89,7 +86,11 @@ pub struct SearchResultsTemplate {
 /// Show a simple HTML form that points to `/search`.
 async fn get_index() -> impl IntoResponse {
     // Renders the index.html template (see templates below)
-    Html(IndexTemplate.render().unwrap_or_else(|_| "Template error".into()))
+    Html(
+        IndexTemplate
+            .render()
+            .unwrap_or_else(|_| "Template error".into()),
+    )
 }
 
 /// Parse `?q=...`, call the global search, and display results.
@@ -119,4 +120,3 @@ pub fn router() -> Router {
         .route("/", get(get_index))
         .route("/search", get(get_search))
 }
-

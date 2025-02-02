@@ -5,7 +5,7 @@ use std::error::Error as StdError;
 pub struct SearchResult {
     pub title: String,
     pub url: String,
-    pub snippet: Snippet
+    pub snippet: Snippet,
 }
 
 #[derive(Debug)]
