@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block body %}
+<h1>Search Results</h1>
+{% if items|length == 0 %}
+<p>No results found.</p>
+{% else %}
+<ul>
+    {% for item in items %}
+    <li class="search-result" onclick="window.location='{{ res.url }}';" style="cursor: pointer;">
+        <article>
+            <h2 class="search-result__title">
+                <a href="{{ res.url }}">{{ res.title }}</a>
+            </h2>
+            <p class="search-result__url">{{ res.url }}</p>
+            <p class="search-result__snippet">{{ res.snippet_html|safe }}</p>
+        </article>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+<p><a href="/">Go back</a></p>
+{% endblock %}

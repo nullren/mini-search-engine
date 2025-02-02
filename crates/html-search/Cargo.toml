@@ -4,3 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+axum = "0.8.1"
+askama = "0.12.1"
+search-api = { path = "../search-api" }
+tokio = { version = "1", features = ["macros"] }
