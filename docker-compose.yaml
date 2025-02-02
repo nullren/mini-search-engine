@@ -2,19 +2,20 @@ services:
   elasticsearch:
     image: elasticsearch:8.17.1
     ports:
-    - 9200
+      - 9200
     deploy:
       resources:
         limits:
           memory: 1G
     networks: [elastic]
     environment:
-    - discovery.type=single-node
-    - xpack.security.enabled=false
+      - discovery.type=single-node
+      - xpack.security.enabled=false
     volumes:
-    - esdata:/usr/share/elasticsearch/data
+      - esdata:/usr/share/elasticsearch/data
+    restart: always
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -23,33 +24,23 @@ services:
   crawler:
     image: docker.elastic.co/integrations/crawler:0.2.0
     command: -c "bin/crawler crawl config/parks.yaml"
+    restart: always
     depends_on:
       elasticsearch:
         condition: service_healthy
     volumes:
-    - ./parks.yaml:/app/config/parks.yaml
+      - ./parks.yaml:/app/config/parks.yaml
     networks:
-    - elastic
-
-  kibana:
-    image: kibana:8.17.1
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    ports:
-    - 5601
-    environment:
-    - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    - SERVER_NAME=kibana
-    networks: [elastic]
+      - elastic
 
   web-server:
     build: .
     environment:
-    - LISTEN_PORT=8080
-    - ELASTICSEARCH_ADDRESS=http://elasticsearch:9200
+      - LISTEN_PORT=8080
+      - ELASTICSEARCH_ADDRESS=http://elasticsearch:9200
     ports:
-    - "${PORT:-8080}:8080"
+      - "${PORT:-8080}:8080"
+    restart: always
     depends_on:
       elasticsearch:
         condition: service_healthy
