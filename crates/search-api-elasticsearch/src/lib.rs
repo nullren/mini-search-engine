@@ -2,16 +2,11 @@ use async_trait::async_trait;
 use elasticsearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use elasticsearch::http::Url;
 use elasticsearch::{Elasticsearch, SearchParts};
-use search_api::{Search, SearchResult, SearchResults, Snippet};
+use search_api::{Search, SearchResult, SearchResults};
 use serde_json::{json, Value};
 
+#[derive(Default)]
 pub struct ElasticsearchStub {}
-
-impl ElasticsearchStub {
-    pub fn new() -> Self {
-        ElasticsearchStub {}
-    }
-}
 
 #[async_trait]
 impl Search for ElasticsearchStub {
@@ -20,10 +15,7 @@ impl Search for ElasticsearchStub {
             results: vec![SearchResult {
                 title: "a stubbed title".to_string(),
                 url: "https://notneeded.net/stubbed/blah".to_string(),
-                snippet: Snippet {
-                    content: "a stubbed snippet".to_string(),
-                    highlighted: vec![(2, 5)],
-                },
+                snippets: vec!["a stubbed snippet".to_string()],
             }],
         })
     }
@@ -51,13 +43,24 @@ impl ElasticsearchRemote {
 impl Search for ElasticsearchRemote {
     async fn search(&self, query: &str) -> Result<SearchResults, search_api::SearchError> {
         let query = json!({
-                "query": {
-                    "query_string": {
-                        "query": query.to_string(),
-                        "default_field": "body"
-                    }
-                }
-            });
+                  "query": {
+                      "query_string": {
+                          "query": query.to_string(),
+                          "default_field": "body"
+                      }
+                  },
+             "_source": ["title", "url"],
+        "highlight": {
+          "pre_tags": ["<mark>"],
+          "post_tags": ["</mark>"],
+          "fields": {
+            "body": {
+              "fragment_size": 150,
+              "number_of_fragments": 3
+            }
+          }
+        }
+              });
         println!("query: {:?}", query);
 
         let response = self
@@ -70,7 +73,10 @@ impl Search for ElasticsearchRemote {
             .unwrap();
 
         let response_body = response.json::<Value>().await.unwrap();
-        println!("response: {:?}", response_body);
+        println!(
+            "response: {}",
+            serde_json::to_string_pretty(&response_body).unwrap()
+        );
 
         let results = response_body["hits"]["hits"]
             .as_array()
@@ -79,10 +85,12 @@ impl Search for ElasticsearchRemote {
             .map(|hit| SearchResult {
                 title: hit["_source"]["title"].as_str().unwrap().to_string(),
                 url: hit["_source"]["url"].as_str().unwrap().to_string(),
-                snippet: Snippet {
-                    content: hit["_source"]["meta_description"].as_str().unwrap().to_string(),
-                    highlighted: vec![],
-                },
+                snippets: hit["highlight"]["body"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|snippet| snippet.as_str().unwrap().to_string())
+                    .collect(),
             })
             .collect();
         Ok(SearchResults { results })

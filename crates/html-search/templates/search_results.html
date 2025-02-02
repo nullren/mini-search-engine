@@ -12,7 +12,11 @@
                 <a href="{{ item.url }}">{{ item.title }}</a>
             </h2>
             <p class="search-result__url">{{ item.url }}</p>
-            <p class="search-result__snippet">{{ item.snippet_html|safe }}</p>
+            <ul>
+                {% for snippet in item.snippets %}
+                <li class="search-result__snippet">{{ snippet|safe }}</li>
+                {% endfor %}
+            </ul>
         </article>
     </li>
     {% endfor %}

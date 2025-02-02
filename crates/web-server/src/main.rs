@@ -1,7 +1,7 @@
 use axum::Router;
 use html_search::router as html_router;
 use search_api::set_search_impl;
-use search_api_elasticsearch::{ElasticsearchRemote, ElasticsearchStub};
+use search_api_elasticsearch::ElasticsearchRemote;
 use tokio::net::TcpListener;
 
 #[tokio::main]
