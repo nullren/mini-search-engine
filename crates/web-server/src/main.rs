@@ -1,7 +1,7 @@
 use axum::Router;
 use tokio::net::TcpListener;
 use search_api::set_search_impl;
-use search_api_elasticsearch::ElasticsearchSearch;
+use search_api_elasticsearch::ElasticsearchStub;
 use html_search::router as html_router;
 
 #[tokio::main]
@@ -11,7 +11,7 @@ async fn main() {
     //
     // This is your custom implementation that implements the `Search` trait
     // from the `search-api` crate.
-    set_search_impl(Box::new(ElasticsearchSearch::new()))
+    set_search_impl(Box::new(ElasticsearchStub::new()))
         .expect("Failed to set global search backend");
 
     //

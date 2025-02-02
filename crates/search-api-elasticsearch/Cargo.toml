@@ -4,4 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+elasticsearch = "8.17.0-alpha.1"
+serde = "1"
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
 search-api = { path = "../search-api" }

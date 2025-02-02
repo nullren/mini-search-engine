@@ -1,14 +1,14 @@
 use search_api::{Search, SearchResult, SearchResults, Snippet};
 
-pub struct ElasticsearchSearch {}
+pub struct ElasticsearchStub {}
 
-impl ElasticsearchSearch {
+impl ElasticsearchStub {
     pub fn new() -> Self {
-        ElasticsearchSearch {}
+        ElasticsearchStub {}
     }
 }
 
-impl Search for ElasticsearchSearch {
+impl Search for ElasticsearchStub {
     fn search(&self, _query: &str) -> Result<SearchResults, search_api::SearchError> {
         Ok(SearchResults { results: vec![SearchResult{
             title: "a stubbed title".to_string(),
